@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
-    
     <style>
 
       h2, p {
@@ -26,29 +25,32 @@
       /*
         D3.js setup code
       */
-
           "use strict";
           var margin = 60,
               width = 1400 - margin,
               height = 600 - margin;
+          
+          // convert values to decimals
+          for (var i = 0; i < data.length; i++) {
+              data[i]["Employment-Population Ratio"] /= 100; 
+          }
 
      /*
         Add titles
      */
-
           d3.select("body")
             .append("h2")
-            .text("The Changing American Workforce");
+            .text("The Evolving Participation of Men and Women in\
+                   the American Workforce");
             
           d3.select("body")
             .append("p")
-            .text("Employment-Population Ratios, 1948 Q1 to 2015 Q3");
+            .text("Ratios of Employment to Population (16+) for Men\
+                   and for Women, 1948 Q1 to 2015 Q3");
             
       /*
         Add svg with chart container
       */
-      
-
           var svg = d3.select("body")
             .append("svg")
               .attr("width", width + margin)
@@ -58,30 +60,189 @@
 
      /*
         Add footer
-     */
-            
+     */            
           d3.select("body")
             .append("p")
             .attr("style", "font-size: 12px")
-            .text("Source: U.S. Bureau of Labor Statistics,\
-                    retrieved from FRED, Federal Reserve Bank of St. Louis");
+            .text("Source: U.S. Bureau of Labor Statistics, retrieved\
+                   from FRED, Federal Reserve Bank of St. Louis.");
 
       /*
         Dimple.js Chart construction code
       */
-
           var myChart = new dimple.chart(svg, data);
           var x = myChart.addTimeAxis("x", "Date"); 
           x.dateParseFormat = "%Y-%m-%d";
           x.tickFormat = "%Y";
           x.timeInterval = 4;
+          x.title = null;
           var y = myChart.addMeasureAxis("y", "Employment-Population Ratio");
-          y.title = "(Percent)";
+          y.tickFormat = "%";
+          y.title = null;
           myChart.addSeries("Group", dimple.plot.line);
           myChart.addLegend(width - 170, 10, 100, 20, "right");
           myChart.draw(2000);
+          
+          annotate(); // call function to add notes and graphics
         };
-            
+
+      /*
+        Annotation function to add explanatory notes and graphics
+      */      
+       function annotate() {
+         var note0_0 = "After WWII, women entered the workforce",
+             note0_1 = "in growing numbers, an addition of more than",
+             note0_2 = "one fourth of women over the next 5 decades.",
+             note1_0 = "From its peak of 85% in 1953, male workforce",
+             note1_1 = "participation began its decline to a low",
+             note1_2 = "of 63% in 2010.",
+             note2_0 = "The 2008 recession had a disparate impact.",
+             note2_1 = "Men's participation fell by 6 points,",
+             note2_2 = "while women's dropped by just 2.8 points.",
+             note3_0 = "These long-term effects and recent events",
+             note3_1 = "have reduced the participation gap from",
+             note3_2 = "from 53 points in 1948 to 11 points in 2015 Q3.",
+             note3_3 = "65%",
+             note3_4 = "54%",
+             t0 = 8,
+             t1 = 16,
+             t2 = 24,
+             t3 = 32;
+         
+         var notes = [{note: note0_0, x: 180, y: 300, t: t0},
+                      {note: note0_1, x: 180, y: 312, t: t0},
+                      {note: note0_2, x: 180, y: 324, t: t0},
+                      {note: note1_0, x: 220, y: 152, t: t1},
+                      {note: note1_1, x: 220, y: 164, t: t1},
+                      {note: note1_2, x: 220, y: 176, t: t1},
+                      {note: note2_0, x: 900, y: 300, t: t2},
+                      {note: note2_1, x: 900, y: 312, t: t2},
+                      {note: note2_2, x: 900, y: 324, t: t2},
+                      {note: note3_0, x: 1000, y: 86, t: t3},
+                      {note: note3_1, x: 1000, y: 98, t: t3},
+                      {note: note3_2, x: 1000, y: 110, t: t3},
+                      {note: note3_3, x: 1250, y: 185, t: t3},
+                      {note: note3_4, x: 1250, y: 248, t: t3}
+                      ]
+         
+         for (var i = 0; i < notes.length; i++) {
+           setTimeout(display, notes[i].t * 1000, notes[i]);
+         }
+         
+         setTimeout(addArrow, (t0 + 2) * 1000);  // add the arrow for note 0
+         setTimeout(styler, (t1 + 2) * 1000);  // style the relevant points for note 1
+         setTimeout(drawLine, t2 * 1000, 0);  // draw the line for note 2
+         setTimeout(drawRect, t2 * 1000);  // draw the rectangle for note 2
+         setTimeout(drawLine, t3 * 1000, 1);  // draw the line for note 3
+       };
+ 
+      /*
+        Function to display notes in svg
+      */      
+       function display(note) {
+         d3.select("svg")
+            .append("g")
+            .append("text")
+            .attr("cols", 40)
+            .attr("x", note.x)
+            .attr("y", note.y)
+            .attr("font-size", 10)
+            .attr("opacity", 0)
+            .text(note.note)
+            .transition()
+            .duration(1000)
+            .attr("opacity", 1);
+       }; 
+
+      /*
+        Function to add arrow for note 0
+      */ 
+       function addArrow() {
+         d3.select("svg")
+            .append("g")
+            .append("image")
+            .attr("xlink:href", "arrow.png")
+            .attr("x", 180)
+            .attr("y", 340)
+            .attr("transform", "rotate(2)") // rotate arrow graphic slightly
+            .attr("height", 720)
+            .attr("width", 960)
+            .attr("opacity", 0.5)
+            .transition() // move arrow to final poition
+            .duration(3000)
+            .attr("x", 400)
+            .attr("y", 290)
+            .transition() //fade arrow
+            .duration(6000)
+            .attr("opacity", 0);
+       };
+       
+      /*
+        Function to style the points for note 1
+      */ 
+       function styler() {
+         var id1953 = ".dimple-thu-jan-01-1953-00-00-00-gmt-0500--est-",
+             id2010 = ".dimple-fri-jan-01-2010-00-00-00-gmt-0500--est-";
+         d3.select(id1953)
+            .attr("fill-opacity", 0)
+            .attr("stroke", "green")
+            .attr("r", 8)
+            .attr("opacity", 1)
+            .transition()
+            .duration(3000)
+            .attr("r", 4);
+         d3.select(id2010)
+            .attr("fill-opacity", 0)
+            .attr("stroke", "red")
+            .attr("r", 8)
+            .attr("opacity", 1)
+            .transition()
+            .duration(3000)
+            .attr("r", 4);
+       };
+              
+      /*
+        Function to add line for note 2
+      */ 
+       function drawLine(l) {
+         var lines = [{x1: 1070, y1: 285, x2: 1150, y2: 195},
+                      {x1: 1150, y1: 120, x2: 1248, y2: 173}]
+         d3.select("svg")
+            .append("g")
+            .append("line")
+            .attr("x1", lines[l].x1)
+            .attr("y1", lines[l].y1)
+            .attr("x2", lines[l].x2)
+            .attr("y2", lines[l].y2)
+            .attr("stroke", "gray")
+            .attr("stroke-width", 2)
+            .attr("opacity", 0)
+            .transition()
+            .duration(1000)
+            .attr("opacity", 0.5);
+       };
+       
+      /*
+        Function to add rectangle for note 2
+      */ 
+       function drawRect() {
+         d3.select("svg")
+            .append("g")
+            .append("rect")
+            .attr("x", 1136)
+            .attr("y", 60)
+            .attr("width", 26)
+            .attr("height", 480)
+            .attr("fill", "gray")
+            .attr("opacity", 0)
+            .transition()
+            .duration(1000)
+            .attr("opacity", 0.15)
+            .transition() // fade rectangle to create space for note 3
+            .duration(8000)
+            .attr("opacity", 0);
+       };
+             
     </script>
   </head>
 <body>
